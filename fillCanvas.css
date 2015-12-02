@@ -1,0 +1,17 @@
+#drawHere {
+	border: solid 1px red;
+}
+
+#drawFFT2D {
+	border: solid 1px green;
+}
+
+#info {
+	border: 1px solid black;
+	width: 400px;
+}
+
+#PausePlay {
+	width : 73px;
+	text-align: center;
+}
