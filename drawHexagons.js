@@ -1,6 +1,6 @@
-var numrows = 50;
-var numcols = 27;
-var radius = 10;
+var numrows = 9;
+var numcols = 30;
+var radius = 30;
 var baseX = 10;
 var baseY = 10;
 
@@ -39,12 +39,12 @@ function drawHex(c2, radius, xOffset0, yOffset0, color) {
     c2.strokeStyle = "#000000";
 
     c2.beginPath();
-    c2.moveTo(radiusCos60 + xOffset0, radiusSin60 + yOffset0);
-    c2.lineTo(-radiusCos60 + xOffset0, radiusSin60 + yOffset0);
-    c2.lineTo(-radius0 + xOffset0, yOffset0);
-    c2.lineTo(-radiusCos60 + xOffset0, -radiusSin60 + yOffset0);
-    c2.lineTo(radiusCos60 + xOffset0, -radiusSin60 + yOffset0);
-    c2.lineTo(radius0 + xOffset0, yOffset0);
+    c2.moveTo(radiusSin60 + xOffset0, radiusCos60 + yOffset0);
+    c2.lineTo(xOffset0, radius0 + yOffset0);
+    c2.lineTo(-radiusSin60 + xOffset0, radiusCos60 + yOffset0);
+    c2.lineTo(-radiusSin60 + xOffset0, -radiusCos60 + yOffset0);
+    c2.lineTo(xOffset0, -radius0 + yOffset0);
+    c2.lineTo(radiusSin60 + xOffset0, -radiusCos60 + yOffset0);
 
     c2.closePath();
     c2.stroke();
@@ -65,8 +65,8 @@ function drawHexagons(){
 	var printIt = document.getElementById("printIt");
 
 	var r3 = Math.sqrt(3) / 2;
-	var yStep = r3 * radius;
-	var xStep = 3 * radius;
+	var yStep = 3 * radius;
+	var xStep = r3 * radius;
 	var toggle = 1.5 * radius;
 
 	
@@ -74,8 +74,8 @@ function drawHexagons(){
    	  for (var col = 0; col < numcols; col += 1) {
         var xPos = col * xStep + baseX;
         var yPos = row * yStep + baseY;
-        var toggle2 = toggle * (row % 2);
-        drawHex(ctx, radius, xPos + toggle2, yPos, ledArray[row][col]===0?black:green);
+        var toggle2 = toggle * ((1+col) % 2);
+        drawHex(ctx, radius, xPos, yPos + toggle2, ledArray[row][col]===0?black:green);
         // printIt.innerHTML = " " + radius + " " + xStep + " " + yStep + " " + row + " " + col+ " " + toggle2 + " " + toggle + " ";
     	}
 	}
