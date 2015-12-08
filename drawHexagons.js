@@ -10,21 +10,28 @@ var myVar;
 
 var splashDelay = 500;
 
+// data array for LEDs - note odd rows are drawn right offset by half a cell
+initial = function(){
+	var temp = {valL : 0, dir : [0,0,0,0,0,0]};
+	return temp;
+}
+
 // extension to Array type for 2D, with initialization - from Douglas Crockford
 Array.matrix = function(numrows, numcols, initial){
    var arr = [];
    for (var i = 0; i < numrows; ++i){
       var columns = [];
       for (var j = 0; j < numcols; ++j){
-         columns[j] = initial;
+         columns[j] = initial();
       }
       arr[i] = columns;
     }
     return arr;
 };
 
-// data array for LEDs - note odd rows are drawn right offset by half a cell
-var ledArray = Array.matrix(numrows,numcols, 0); // create the data matrix, fill with zeros
+var ledArray = Array.matrix(numrows,numcols, initial); // create the data matrix, fill with zeros
+var ledArrayTemp = Array.matrix(numrows,numcols, initial); // create the data matrix, fill with zeros
+
 
 function drawHex(c2, radius, xOffset0, yOffset0, color) {
 
@@ -75,17 +82,22 @@ function drawHexagons(){
         var xPos = col * xStep + baseX;
         var yPos = row * yStep + baseY;
         var toggle2 = toggle * ((1+col) % 2);
-        drawHex(ctx, radius, xPos, yPos + toggle2, ledArray[row][col]===0?black:green);
+        drawHex(ctx, radius, xPos, yPos + toggle2, ledArray[row][col].valL===0?black:green);
         // printIt.innerHTML = " " + radius + " " + xStep + " " + yStep + " " + row + " " + col+ " " + toggle2 + " " + toggle + " ";
     	}
 	}
 }
 
-// perform timer activity - calculate ripples
-function cycle(myVar){
+// calculate next generation
+function nextGen(leds, numrows, numcols){
 	newDropY = Math.floor(Math.random()*numrows);
 	newDropX = Math.floor(Math.random()*numcols);
-	ledArray[newDropY][newDropX] = 1;
+	leds[newDropY][newDropX].valL = 1;
+}
+
+// perform timer activity - calculate ripples
+function cycle(myVar){
+	nextGen(ledArray, numrows, numcols);
 	drawHexagons();
 	
 }
