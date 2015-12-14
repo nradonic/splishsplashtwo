@@ -8,7 +8,14 @@ var newDropX = 10;
 var newDropY = 10;
 var myVar;
 
-var splashDelay = 500;
+var splashDelay = 4;
+var rippleDelay = 500;
+var timeCounter = 0;
+
+var ledStateOff = 0;
+var ledStateStale = 1;
+var ledStateJustTurnedOn = 2;
+
 
 // data array for LEDs - note odd rows are drawn right offset by half a cell
 initial = function(){
@@ -31,7 +38,7 @@ Array.matrix = function(numrows, numcols, initial){
 
 var ledArray = Array.matrix(numrows,numcols, initial); // create the data matrix, fill with zeros
 var ledArrayTemp = Array.matrix(numrows,numcols, initial); // create the data matrix, fill with zeros
-
+var ledsTemp;
 
 function drawHex(c2, radius, xOffset0, yOffset0, color) {
 
@@ -67,8 +74,7 @@ function getRandomColor(){
 	else {return black;} 
 }
 
-function drawHexagons(){
-	var ctx = document.getElementById('drawHere').getContext('2d');
+function drawHexagons(ctx, leds){
 	var printIt = document.getElementById("printIt");
 
 	var r3 = Math.sqrt(3) / 2;
@@ -81,28 +87,63 @@ function drawHexagons(){
    	  for (var col = 0; col < numcols; col += 1) {
         var xPos = col * xStep + baseX;
         var yPos = row * yStep + baseY;
+        // right on even columns, left on odd
+        //0    x x
+        //1   x x x
+        //2    x x
         var toggle2 = toggle * ((1+col) % 2);
-        drawHex(ctx, radius, xPos, yPos + toggle2, ledArray[row][col].valL===0?black:green);
+        drawHex(ctx, radius, xPos, yPos + toggle2, leds[row][col].valL===0?black:green);
         // printIt.innerHTML = " " + radius + " " + xStep + " " + yStep + " " + row + " " + col+ " " + toggle2 + " " + toggle + " ";
     	}
 	}
 }
 
+function calculateRipples(ledsOld, ledsNext){
+	for (nrows=0; nrows<numrows; nrows++){
+		for (ncols=0; ncols<numcols; ncols++){
+			if(ledsOld[nrows][ncols].valL === ledStateOff){
+				ledsNext[nrows][ncols].valL = ledStateOff;
+			}
+			if(ledsOld[nrows][ncols].valL === ledStateJustTurnedOn){
+				ledsNext[nrows][ncols].valL = ledStateStale;
+			}
+			if(ledsOld[nrows][ncols].valL === ledStateStale){
+				ledsNext[nrows][ncols].valL = ledStateOff;
+			}
+		
+			
+		}
+	}
+}
+
 // calculate next generation
-function nextGen(leds, numrows, numcols){
-	newDropY = Math.floor(Math.random()*numrows);
-	newDropX = Math.floor(Math.random()*numcols);
-	leds[newDropY][newDropX].valL = 1;
+function nextGen(ledsOld, ledsNext, numrows, numcols){
+	calculateRipples(ledsOld, ledsNext);
+	
+	if( timeCounter % splashDelay === 0){
+		newDropY = Math.floor(Math.random()*numrows);
+		newDropX = Math.floor(Math.random()*numcols);
+		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
+	}
 }
 
 // perform timer activity - calculate ripples
 function cycle(myVar){
-	nextGen(ledArray, numrows, numcols);
-	drawHexagons();
+	timeCounter++; // increment time 1 cycle
+	nextGen(ledArray, ledArrayTemp, numrows, numcols);
+	var ctx = document.getElementById('drawHere').getContext('2d');
+	drawHexagons(ctx, ledArray);
+	var ctx2 = document.getElementById('drawHere2').getContext('2d');
+	drawHexagons(ctx2, ledArrayTemp);
 	
+	
+	// swap led arrays....
+	ledsTemp = ledArray;
+	ledArray = ledArrayTemp;
+	ledArrayTemp = ledsTemp;
 }
 
-drawHexagons();
-myVar = setInterval(function(){cycle(myVar)},splashDelay);
+cycle();
+myVar = setInterval(function(){cycle(myVar)},rippleDelay);
 
 
