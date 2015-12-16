@@ -16,12 +16,35 @@ var ledStateOff = 0;
 var ledStateStale = 1;
 var ledStateJustTurnedOn = 2;
 
+        // right on even columns, left on odd
+        //0    x x         2 1
+        //1   x x x       3 0 0
+        //2    x x         4 5
+        
+function left1(X){return X-1;}
+function right1(X){return X+1;}
+function updownLeft(Y,X){
+	if(Y%2===0){return X;}
+	else{return X-1;}
+}
+function updownRight(Y,X){
+	if(Y%2===0){return X+1;}
+	else {return X;}
+}
 
-// data array for LEDs - note odd rows are drawn right offset by half a cell
+// data array for LEDs - note even rows are drawn right offset by half a cell
 initial = function(){
-	var temp = {valL : 0, dir : [0,0,0,0,0,0]};
+	var temp = {valL : 0, dir : [0,0,0,0,0,0]}; // dir={cellr=0, cellur=1, cellul=2, celll=3, cellll=4, celllr=5}
 	return temp;
 }
+var cellr=0;
+var cellur=1;
+var cellul=2;
+var celll=3;
+var cellll=4;
+var celllr=5;
+var neighborTurnedOn = 1;
+var neighborTurnedOff = 0;
 
 // extension to Array type for 2D, with initialization - from Douglas Crockford
 Array.matrix = function(numrows, numcols, initial){
@@ -98,6 +121,49 @@ function drawHexagons(ctx, leds){
 	}
 }
 
+// clear tags
+function clearTags(leds, Y,X){
+	leds[Y][X].dir = [0,0,0,0,0,0];
+}
+
+// check is any tags are active - returns nonzero for activity
+function checkTags(leds, Y, X){
+	var activity = 0;
+	for (i=0;i<6;i++){
+		activity += leds[Y][X].dir[i];
+	}
+	return activity;
+}
+
+// turn on the direction tags to show where activity is coming from ...
+function setNeighborDirection(leds, Y,X){
+	// tag left
+	if(X>0){
+		leds[Y][X-1].dir[cellr]=neighborTurnedOn;
+	}
+	// tag right
+	if(X<numcols-1){
+		leds[Y][X+1].dir[celll]=neighborTurnedOn;
+	}
+	// tag upright
+	if(Y>0 && X<numcols-1){
+		leds[Y-1][updownRight(Y,X)].dir[cellll]=neighborTurnedOn;
+	}
+	// tag downright
+	if(Y<numrows-1 && X<numcols-1){
+		leds[Y+1][updownRight(Y,X)].dir[cellul]=neighborTurnedOn;
+	}
+	// tag upleft
+	if(Y>0 && X>0){
+		leds[Y-1][updownLeft(Y,X)].dir[celllr]=neighborTurnedOn;
+	}
+	// tag downleft
+	if(Y<numrows-1 && X<numcols-1){
+		leds[Y+1][updownLeft(Y,X)].dir[cellur]=neighborTurnedOn;
+	}
+}
+
+// propagate changes to next generation
 function calculateRipples(ledsOld, ledsNext){
 	for (nrows=0; nrows<numrows; nrows++){
 		for (ncols=0; ncols<numcols; ncols++){
@@ -110,20 +176,30 @@ function calculateRipples(ledsOld, ledsNext){
 			if(ledsOld[nrows][ncols].valL === ledStateStale){
 				ledsNext[nrows][ncols].valL = ledStateOff;
 			}
-		
-			
+		}
+	}
+	for (nrows=0; nrows<numrows; nrows++){
+		for (ncols=0; ncols<numcols; ncols++){
+			if(checkTags(ledsOld, nrows, ncols) > 0) {
+				ledsNext[nrows][ncols].valL = ledStateJustTurnedOn;
+				clearTags(ledsNext, nrows, ncols);
+				clearTags(ledsOld, nrows, ncols);
+				
+			}
 		}
 	}
 }
+
 
 // calculate next generation
 function nextGen(ledsOld, ledsNext, numrows, numcols){
 	calculateRipples(ledsOld, ledsNext);
 	
 	if( timeCounter % splashDelay === 0){
-		newDropY = Math.floor(Math.random()*numrows);
-		newDropX = Math.floor(Math.random()*numcols);
+		newDropY = 4;//Math.floor(Math.random()*numrows);
+		newDropX = 4;//Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
+		setNeighborDirection(ledsNext, newDropY, newDropX);
 	}
 }
 
