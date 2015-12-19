@@ -1,6 +1,6 @@
-var numrows = 25;
-var numcols = 25;
-var radius = 20;
+var numrows = 50;
+var numcols = 50;
+var radius = 10;
 var baseX = 10;
 var baseY = 10;
 
@@ -28,7 +28,7 @@ var cellll=4;
 var celllr=5;
 var neighborIsTurnedOn = 1;
 var neighborIsTurnedOff = 0;
-var allDirectionTagsOn = [1,1,1,1,1,1];
+var allDirectionTagsOn = [2,2,2,2,2,2];
       
 function left1(X){return X-1;}
 function right1(X){return X+1;}
@@ -191,12 +191,12 @@ function setNeighborDirection(ledsOld, ledsNext, Y,X){
 	var updownRX = updownRight(Y,X);
 	var updownLX = updownLeft(Y,X);
 	
-	var branchR = ledCenterOld.dir[cellr]===1 && ledCenterOld.dir[cellur]===0 && ledCenterOld.dir[celllr]===0;
-	var branchLR = ledCenterOld.dir[celllr]===1 && ledCenterOld.dir[cellr]===0 && ledCenterOld.dir[cellll]===0;
-	var branchUR = ledCenterOld.dir[cellur]===1 && ledCenterOld.dir[cellr]===0 && ledCenterOld.dir[cellul]===0;
-	var branchL = ledCenterOld.dir[celll]===1 && ledCenterOld.dir[cellul]===0 && ledCenterOld.dir[cellll]===0;
-	var branchLL = ledCenterOld.dir[cellll]===1 && ledCenterOld.dir[celll]===0 && ledCenterOld.dir[celllr]===0;
-	var branchUL = ledCenterOld.dir[cellul]===1 && ledCenterOld.dir[cellur]===0 && ledCenterOld.dir[celll]===0;
+	var branchR = ledCenterOld.dir[cellr]===2;//1 && ledCenterOld.dir[cellur]===0 && ledCenterOld.dir[celllr]===0;
+	var branchLR = ledCenterOld.dir[celllr]===2;//1 && ledCenterOld.dir[cellr]===0 && ledCenterOld.dir[cellll]===0;
+	var branchUR = ledCenterOld.dir[cellur]===2;//1 && ledCenterOld.dir[cellr]===0 && ledCenterOld.dir[cellul]===0;
+	var branchL = ledCenterOld.dir[celll]===2;//1 && ledCenterOld.dir[cellul]===0 && ledCenterOld.dir[cellll]===0;
+	var branchLL = ledCenterOld.dir[cellll]===2;//1 && ledCenterOld.dir[celll]===0 && ledCenterOld.dir[celllr]===0;
+	var branchUL = ledCenterOld.dir[cellul]===2;//1 && ledCenterOld.dir[cellur]===0 && ledCenterOld.dir[celll]===0;
 	
 	// various edge conditions on letting the single 'dir' bit branch decisions
 	var branchOnSingle = Y>0 &&	(X>0 || X===0 && evenOdd(Y)===even) && Y<numrows-1 && 
@@ -214,86 +214,98 @@ LR	UL,UR,L		LR,LL,R
 */	
 
 	// tag left
-	if(ledCenterOld.dir[cellr]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[cellr]!==neighborIsTurnedOff){ 
 		if(leftX>=0){
-			ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
+			ledsNext[Y][leftX].dir[cellr]=ledCenterOld.dir[cellr];
 		}
-		if(branchOnSingle===1 && branchR){ 
+		if(branchR){ 
 			if(Y>0 && updownLX >= 0){
-				ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
+				var tempDir = ledsNext[upY][updownLX];
+				tempDir.dir[celllr]=Math.max(neighborIsTurnedOn,tempDir.dir[celllr]);
 			}
 			if(Y<numrows-1 && updownLX>=0){
-				ledsNext[downY][updownLeft(Y,X)].dir[cellur]=neighborIsTurnedOn;
+				var tempDir = ledsNext[downY][updownLeft(Y,X)];
+				tempDir.dir[cellur]=Math.max(neighborIsTurnedOn,tempDir.dir[cellur]);
 			}
 		}
 	}
 	// tag right
-	if(ledCenterOld.dir[celll]===neighborIsTurnedOn){
+	if(ledCenterOld.dir[celll]!==neighborIsTurnedOff){
 		if(rightX<numcols){
-			ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
+			ledsNext[Y][rightX].dir[celll]=ledCenterOld.dir[celll];
 		}
-		if(branchOnSingle===1 && branchL){ 
+		if(branchL){ 
 			if(upY>=0 && updownRX<numcols){
-				ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
+				var tempDir = ledsNext[upY][updownRX];
+				tempDir.dir[cellll]=Math.max(neighborIsTurnedOn,tempDir.dir[cellll]);
 			}
 			if(downY<numrows && updownRX<numcols){
-				ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
+				var tempDir = ledsNext[downY][updownRX];
+				tempDir.dir[cellul]=Math.max(neighborIsTurnedOn,tempDir.dir[cellul]);
 			}
 		}
 	}
 	// tag upright
-	if(ledCenterOld.dir[cellll]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[cellll]!==neighborIsTurnedOff){ 
 		if(upY>=0 && updownRX < numcols){
-			ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
+			ledsNext[upY][updownRX].dir[cellll]=ledCenterOld.dir[cellll];
 		}
-		if(branchOnSingle===1 && branchLL){ 
+		if(branchLL){ 
 			if(upY>=0 && updownLX>=0){
-				ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
+				var tempDir = ledsNext[upY][updownLX];
+				tempDir.dir[celllr]=Math.max(neighborIsTurnedOn,tempDir.dir[celllr]);
 			}
 			if(rightX<numcols){
-				ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
+				var tempDir = ledsNext[Y][rightX];
+				tempDir.dir[celll]=Math.max(neighborIsTurnedOn,tempDir.dir[celll]);
 			}
 		}
 	}
 	// tag downright
-	if(ledCenterOld.dir[cellul]===neighborIsTurnedOn){
+	if(ledCenterOld.dir[cellul]!==neighborIsTurnedOff){
 		if(downY<numrows && updownRX < numcols-1){
-			ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
+			ledsNext[downY][updownRX].dir[cellul]=ledCenterOld.dir[cellul];
 		}
-		if(branchOnSingle===1 && branchUL){ 
+		if(branchUL){ 
 			if(downY<numrows && updownLX >=0){
-				ledsNext[downY][updownLX].dir[cellur]=neighborIsTurnedOn;
+				var tempDir = ledsNext[downY][updownLX];
+				tempDir.dir[cellur]=Math.max(neighborIsTurnedOn,tempDir.dir[cellur]);
 			}
 			if(rightX<numcols && branchOnSingle!==0){
-				ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
+				var tempDir = ledsNext[Y][rightX];
+				tempDir.dir[celll]=Math.max(neighborIsTurnedOn,tempDir.dir[celll]);
 			}
 		}
 	}
 	// tag upleft
-	if(ledCenterOld.dir[celllr]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[celllr]!==neighborIsTurnedOff){ 
 		if(upY>=0 && updownLX>=0){
-			ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
+			ledsNext[upY][updownLX].dir[celllr]=ledCenterOld.dir[celllr];
 		}
-		if(branchOnSingle===1 && branchLR){ 
+		if(branchLR){ 
 			if(upY>=0 && updownRX<numcols){
-				ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
+				var tempDir = ledsNext[upY][updownRX];
+				tempDir.dir[cellll]=Math.max(neighborIsTurnedOn,tempDir.dir[cellll]);
 			}
 			if(leftX>=0){
-				ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
+				var tempDir = ledsNext[Y][leftX];
+				tempDir.dir[cellr]=Math.max(neighborIsTurnedOn,tempDir.dir[cellr]);
 			}
 		}
 	}
 	// tag downleft
-	if(ledCenterOld.dir[cellur]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[cellur]!==neighborIsTurnedOff){ 
 		if(downY<numrows && updownLX>=0){
-			ledsNext[downY][updownLX].dir[cellur]=neighborIsTurnedOn;
+			ledsNext[downY][updownLX].dir[cellur]=ledCenterOld.dir[cellur];
 		}
-		if(branchOnSingle===1 && branchUR){ 
+		if(branchUR){ 
 			if(downY<numrows && updownRX<numcols){
-				ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
+				var tempDir = ledsNext[downY][updownRX];
+				tempDir.dir[cellul]=Math.max(neighborIsTurnedOn,tempDir.dir[cellul]);
 			}
 			if(leftX>=0){
-				ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
+				var tempDir = ledsNext[Y][leftX];
+				tempDir.dir[cellr]=Math.max(neighborIsTurnedOn,tempDir.dir[cellr]);
 			}
 		}
 	}
