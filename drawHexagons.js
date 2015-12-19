@@ -186,10 +186,14 @@ function setNeighborDirection(ledsOld, ledsNext, Y,X){
 	var rightX = X+1;
 	var upY = Y-1;
 	var downY = Y+1;
-	var ledCenter = ledsOld[Y][X];
+	var ledCenterOld = ledsOld[Y][X];
+	var ledCenterNext = ledsNext[Y][X];
 	var updownRX = updownRight(Y,X);
 	var updownLX = updownLeft(Y,X);
-	
+	var branchOnSingle = checkTags(ledsOld, Y, X)===1 && Y>0 && 
+			(X>0 || X===0 && evenOdd(Y)===even) && Y<numrows-1 && 
+			(X<numcols-1 || X===numcols-1 && evenOdd(Y)===odd)
+			 ? 1 : 0;
 	
 /**
 DIR Bit	Displacement	Bits to set
@@ -201,75 +205,76 @@ L	R,UR,LR		L,LL,UL
 LL	UR,UL,R		LL,LR,L
 LR	UL,UR,L		LR,LL,R
 */	
+
 	// tag left
-	if(ledCenter.dir[cellr]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[cellr]===neighborIsTurnedOn){ 
 		if(leftX>=0){
 			ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
 		}
-		if(Y>0 && updownLX >= 0){
+		if(Y>0 && updownLX >= 0 && branchOnSingle!==0){
 			ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
 		}
-		if(Y<numrows-1 && updownLX>=0){
+		if(Y<numrows-1 && updownLX>=0 && branchOnSingle!==0){
 			ledsNext[downY][updownLeft(Y,X)].dir[cellur]=neighborIsTurnedOn;
 		}
 	}
 	// tag right
-	if(ledCenter.dir[celll]===neighborIsTurnedOn){
+	if(ledCenterOld.dir[celll]===neighborIsTurnedOn){
 		if(rightX<numcols){
 			ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
 		}
-		if(upY>=0 && updownRX<numcols){
+		if(upY>=0 && updownRX<numcols && branchOnSingle!==0){
 			ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
 		}
-		if(downY<numrows && updownRX<numcols){
+		if(downY<numrows && updownRX<numcols && branchOnSingle!==0){
 			ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
 		}
 	}
 	// tag upright
-	if(ledCenter.dir[cellll]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[cellll]===neighborIsTurnedOn){ 
 		if(upY>=0 && updownRX < numcols){
 			ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
 		}
-		if(upY>=0 && updownLX>=0){
+		if(upY>=0 && updownLX>=0 && branchOnSingle!==0){
 				ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
 		}
-		if(rightX<numcols){
+		if(rightX<numcols && branchOnSingle!==0){
 			ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
 		}
 	}
 	// tag downright
-	if(ledCenter.dir[cellul]===neighborIsTurnedOn){
+	if(ledCenterOld.dir[cellul]===neighborIsTurnedOn){
 		if(downY<numrows && updownRX < numcols-1){
 			ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
 		}
-		if(downY<numrows && updownLX > 0){
+		if(downY<numrows && updownLX >=0 && branchOnSingle!==0){
 			ledsNext[downY][updownLX].dir[cellur]=neighborIsTurnedOn;
 		}
-		if(rightX<numcols){
+		if(rightX<numcols && branchOnSingle!==0){
 			ledsNext[Y][rightX].dir[celll]=neighborIsTurnedOn;
-		}		
+		}
 	}
 	// tag upleft
-	if(ledCenter.dir[celllr]===neighborIsTurnedOn){ 
+	if(ledCenterOld.dir[celllr]===neighborIsTurnedOn){ 
 		if(upY>=0 && updownLX>=0){
 			ledsNext[upY][updownLX].dir[celllr]=neighborIsTurnedOn;
 		}
-		if(upY>=0 && updownRX<numcols){
+		if(upY>=0 && updownRX<numcols && branchOnSingle!==0){
 			ledsNext[upY][updownRX].dir[cellll]=neighborIsTurnedOn;
 		}
-		if(leftX>=0){
+		if(leftX>=0 && branchOnSingle!==0){
 			ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
 		}
 	}
 	// tag downleft
-	if(ledCenter.dir[cellur]===neighborIsTurnedOn){ 
-		if(downY<numrows && updownLX>0){
+	if(ledCenterOld.dir[cellur]===neighborIsTurnedOn){ 
+		if(downY<numrows && updownLX>=0){
 			ledsNext[downY][updownLX].dir[cellur]=neighborIsTurnedOn;
 		}
-		if(downY<numrows && updownRX<numcols){
+		if(downY<numrows && updownRX<numcols && branchOnSingle!==0){
 			ledsNext[downY][updownRX].dir[cellul]=neighborIsTurnedOn;
 		}
-		if(leftX>=0){
+		if(leftX>=0 && branchOnSingle!==0){
 			ledsNext[Y][leftX].dir[cellr]=neighborIsTurnedOn;
 		}
 	}
@@ -286,32 +291,34 @@ function calculateRipples(ledsOld, ledsNext){
 					break;
 				case ledStateStale: 
 					ledsNext[nrows][ncols].valL = ledStateOff;
-					//clearTags(ledsOld, nrows, ncols);				
 					break;
 				case ledStateJustTurnedOn: 
 					ledsNext[nrows][ncols].valL = ledStateStale;
-					//clearTags(ledsOld, nrows, ncols);				
 					break;
 				default:
 					ledsNext[nrows][ncols].valL = ledStateOff;
 					break;			
-			}
-
-			
+			}			
+		}
+	}
+	// clear ledsNext tags
+	for (nrows=0; nrows<numrows; nrows++){
+		for (ncols=0; ncols<numcols; ncols++){
+			clearTags(ledsNext, nrows, ncols);
 		}
 	}
 	// set neighbor change tags
 	for (nrows=0; nrows<numrows; nrows++){
 		for (ncols=0; ncols<numcols; ncols++){
-			if(ledsNext[nrows][ncols].valL === ledStateJustTurnedOn){
-				setNeighborDirection(ledsOld, ledsNext, nrows, ncols);				
-			}
+			//if(ledsNext[nrows][ncols].valL === ledStateJustTurnedOn){
+			setNeighborDirection(ledsOld, ledsNext, nrows, ncols);				
+			//}
 		}
 	}
 	// propagate the changes look for change tags and turn on those lights
 	for (nrows=0; nrows<numrows; nrows++){
 		for (ncols=0; ncols<numcols; ncols++){
-			if(checkTags(ledsOld, nrows, ncols) > 0){
+			if(checkTags(ledsNext, nrows, ncols) > 0){
 				ledsNext[nrows][ncols].valL = ledStateJustTurnedOn;
 			}
 		}
@@ -328,16 +335,6 @@ function nextGen(ledsOld, ledsNext, numrows, numcols){
 		newDropX = 4;//Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
 		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
-		ledsOld[newDropY][newDropX].dir = allDirectionTagsOn;
-//		setNeighborDirection(ledsOld, ledsNext, newDropY, newDropX);
-	}
-	if( timeCounter % splashDelay === 5){
-		newDropY = 15;//Math.floor(Math.random()*numrows);
-		newDropX = 15;//Math.floor(Math.random()*numcols);
-		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
-		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
-		ledsOld[newDropY][newDropX].dir = allDirectionTagsOn;
-//		setNeighborDirection(ledsOld, ledsNext, newDropY, newDropX);
 	}
 }
 
