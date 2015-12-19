@@ -88,7 +88,9 @@ function drawHex(c2, radius, xOffset0, yOffset0, color, dir) {
     c2.closePath();
     c2.stroke();
     c2.fill();
+    
     // draw direction arrows
+    /**
     c2.beginPath();
     c2.strokeStyle = "#FF0000";
 	if(dir[cellr]!=0){
@@ -116,7 +118,8 @@ function drawHex(c2, radius, xOffset0, yOffset0, color, dir) {
 	    c2.lineTo(xOffset0, yOffset0);
 	}
 	c2.closePath();
-	c2.stroke();
+	c2.stroke(); 
+	*/
 }
 
 // color constants
@@ -356,23 +359,25 @@ function calculateRipples(ledsOld, ledsNext){
 	}
 }
 
+var snd = new Audio("droplet.m4a"); // buffers automatically when created
+var dropThreshold = 0.9;
 
 // calculate next generation
 function nextGen(ledsOld, ledsNext, numrows, numcols){
 	calculateRipples(ledsOld, ledsNext);
-	
-	if( timeCounter % splashDelay === 0){
-		newDropY = 4;//Math.floor(Math.random()*numrows);
-		newDropX = 4;//Math.floor(Math.random()*numcols);
+	if( Math.random()>dropThreshold){
+		newDropY = Math.floor(Math.random()*numrows);
+		newDropX = Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
 		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
+		snd.play();
 	}
-	if( timeCounter % splashDelay === 5){
+/**	if( timeCounter % splashDelay === 5){
 		newDropY = 15;//Math.floor(Math.random()*numrows);
 		newDropX = 14;//Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
 		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
-	}
+	} */
 }
 
 // perform timer activity - calculate ripples
