@@ -1,5 +1,5 @@
-var numrows = 50;
-var numcols = 50;
+var numrows = 53;
+var numcols =46;
 var radius = 10;
 var baseX = 10;
 var baseY = 10;
@@ -9,7 +9,7 @@ var newDropY = 10;
 var myVar;
 
 var splashDelay = 10;
-var rippleDelay = 1000;
+var rippleDelay = 500;
 var timeCounter = 0;
 
 var ledStateOff = 0;
@@ -386,8 +386,8 @@ function cycle(myVar){
 	nextGen(ledArray, ledArrayTemp, numrows, numcols);
 	var ctx = document.getElementById('drawHere').getContext('2d');
 	drawHexagons(ctx, ledArray);
-	var ctx2 = document.getElementById('drawHere2').getContext('2d');
-	drawHexagons(ctx2, ledArrayTemp);
+//	var ctx2 = document.getElementById('drawHere2').getContext('2d');
+//	drawHexagons(ctx2, ledArrayTemp);
 	
 	
 	// swap led arrays....
