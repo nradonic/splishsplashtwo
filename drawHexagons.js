@@ -286,10 +286,11 @@ function calculateRipples(ledsOld, ledsNext){
 					break;
 				case ledStateStale: 
 					ledsNext[nrows][ncols].valL = ledStateOff;
+					//clearTags(ledsOld, nrows, ncols);				
 					break;
 				case ledStateJustTurnedOn: 
 					ledsNext[nrows][ncols].valL = ledStateStale;
-					clearTags(ledsOld, nrows, ncols);				
+					//clearTags(ledsOld, nrows, ncols);				
 					break;
 				default:
 					ledsNext[nrows][ncols].valL = ledStateOff;
@@ -297,14 +298,6 @@ function calculateRipples(ledsOld, ledsNext){
 			}
 
 			
-		}
-	}
-	// propagate the changes look for change tags and turn on those lights
-	for (nrows=0; nrows<numrows; nrows++){
-		for (ncols=0; ncols<numcols; ncols++){
-			if(checkTags(ledsOld, nrows, ncols) > 0){
-				ledsNext[nrows][ncols].valL = ledStateJustTurnedOn;
-			}
 		}
 	}
 	// set neighbor change tags
@@ -315,15 +308,14 @@ function calculateRipples(ledsOld, ledsNext){
 			}
 		}
 	}
-	// set neighbor change tags
+	// propagate the changes look for change tags and turn on those lights
 	for (nrows=0; nrows<numrows; nrows++){
 		for (ncols=0; ncols<numcols; ncols++){
-			if(ledsNext[nrows][ncols].valL === ledStateStale){
-				clearTags(ledsNext, nrows, ncols);				
+			if(checkTags(ledsOld, nrows, ncols) > 0){
+				ledsNext[nrows][ncols].valL = ledStateJustTurnedOn;
 			}
 		}
 	}
-
 }
 
 
@@ -332,12 +324,20 @@ function nextGen(ledsOld, ledsNext, numrows, numcols){
 	calculateRipples(ledsOld, ledsNext);
 	
 	if( timeCounter % splashDelay === 0){
-		newDropY = Math.floor(Math.random()*numrows);
-		newDropX = Math.floor(Math.random()*numcols);
+		newDropY = 4;//Math.floor(Math.random()*numrows);
+		newDropX = 4;//Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
 		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
 		ledsOld[newDropY][newDropX].dir = allDirectionTagsOn;
-		setNeighborDirection(ledsOld, ledsNext, newDropY, newDropX);
+//		setNeighborDirection(ledsOld, ledsNext, newDropY, newDropX);
+	}
+	if( timeCounter % splashDelay === 5){
+		newDropY = 15;//Math.floor(Math.random()*numrows);
+		newDropX = 15;//Math.floor(Math.random()*numcols);
+		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
+		ledsNext[newDropY][newDropX].dir = allDirectionTagsOn;
+		ledsOld[newDropY][newDropX].dir = allDirectionTagsOn;
+//		setNeighborDirection(ledsOld, ledsNext, newDropY, newDropX);
 	}
 }
 
