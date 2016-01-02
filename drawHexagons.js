@@ -11,6 +11,7 @@ var myVar;
 var splashDelay = 10;
 var rippleDelay = 500;
 var timeCounter = 0;
+var dropletCount = 0;
 
 var ledStateOff = 0;
 var ledStateStale = 1;
@@ -266,7 +267,7 @@ LR	UL,UR,L		LR,LL,R
 	}
 	// tag downright
 	if(ledCenterOld.dir[cellul]!==neighborIsTurnedOff){
-		if(downY<numrows && updownRX < numcols-1){
+		if(downY<numrows && updownRX < numcols){
 			ledsNext[downY][updownRX].dir[cellul]=ledCenterOld.dir[cellul];
 		}
 		if(branchUL){ 
@@ -366,6 +367,7 @@ var dropThreshold = 0.9;
 function nextGen(ledsOld, ledsNext, numrows, numcols){
 	calculateRipples(ledsOld, ledsNext);
 	if( Math.random()>dropThreshold){
+		dropletCount += 1;
 		newDropY = Math.floor(Math.random()*numrows);
 		newDropX = Math.floor(Math.random()*numcols);
 		ledsNext[newDropY][newDropX].valL = ledStateJustTurnedOn;
@@ -395,6 +397,7 @@ function cycle(myVar){
 	ledArray = ledArrayTemp;
 	ledArrayTemp = ledsTemp;
 	document.getElementById("screenDraw").innerHTML=timeCounter.toFixed(0);
+	document.getElementById("dropletCount").innerHTML=dropletCount.toFixed(0);
 }
 
 cycle();
